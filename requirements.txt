@@ -3,4 +3,3 @@ grpcio-tools
 sqlalchemy
 mysql-connector-python
 yfinance
-cachetools
