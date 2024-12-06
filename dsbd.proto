@@ -7,6 +7,8 @@ service DSBDService {
   rpc DeleteUser(DeleteUserRequest) returns (UserResponse);
   rpc GetTickerValue(GetTickerRequest) returns (TickerResponse);
   rpc GetTickerAverage(GetTickerAverageRequest) returns (TickerResponse);
+
+  rpc UpdateUserThresholds(UpdateUserThresholdsRequest) returns (UserResponse);
 }
 
 message LoginUserRequest {
@@ -23,6 +25,12 @@ message UpdateUserRequest {
   string email = 1;
   string ticker = 2;
   string message_id = 3;  // ID univoco calcolato come hash(email + vecchio_ticker)
+}
+
+message UpdateUserThresholdsRequest {
+  string email = 1;        
+  float high_value = 2;    
+  float low_value = 3;     
 }
 
 message DeleteUserRequest {

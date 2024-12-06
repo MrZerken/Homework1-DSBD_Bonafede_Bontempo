@@ -91,6 +91,34 @@ class DSBDServer(DSBDServiceServicer):
         with cache_lock:
             self.update_cache[message_id] = True
         return UserResponse(success=True, message="Update effettuato con successo.")
+    
+    def UpdateUserThresholds(self, request, context):
+        email = request.email
+        user = self.session.query(User).filter_by(email=email).first()
+        high_value = request.high_value
+        low_value = request.low_value 
+        if not user:
+            return UserResponse(success=False, message="Utente non trovato.")
+        
+        
+        if request.high_value < user.low_value:
+            return UserResponse(success=False, message="Impossibile impostare high_value inferiore di low_value")
+        if request.low_value > user.high_value and user.high_value != float(0.0):
+            return UserResponse(success=False, message="Impossibile impostare low_value maggiore di high_value")
+        if request.low_value < 0:
+            return UserResponse(success=False, message="Impossibile impostare low_value maggiore di high_value")
+
+        # Aggiorna le soglie se fornite
+        if request.high_value != 0:
+            user.high_value = request.high_value
+        if request.low_value != 0:
+            user.low_value = request.low_value
+
+       # with cache_lock:
+       #     self.update_cache[message_id] = True
+       # self.session.add(UpdateMessage(message_id=message_id))
+        self.session.commit()
+        return UserResponse(success=True, message="Soglie aggiornate con successo.")
 
     def DeleteUser(self, request, context):
         email = request.email
