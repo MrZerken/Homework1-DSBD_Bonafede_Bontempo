@@ -4,7 +4,27 @@ import yfinance as yf
 import pytz
 from database import SessionLocal, User, StockData
 from datetime import datetime
+from confluent_kafka import Producer
+import json
 
+
+# Kafka configuration
+producer_config = {
+    'bootstrap.servers': 'localhost:29092',  # Kafka broker address
+    'acks': 'all',  # Ensure all in-sync replicas acknowledge the message
+    'batch.size': 500,  # Maximum number of bytes to batch in a single request
+    'max.in.flight.requests.per.connection': 1,  # Only one in-flight request per connection
+    'retries': 3  # Retry up to 3 times on failure
+}
+
+producer = Producer(producer_config)
+
+def delivery_report(err, msg):
+    """Callback to report the result of message delivery."""
+    if err:
+        print(f"Delivery failed: {err}")
+    else:
+        print(f"Message delivered to {msg.topic()} [{msg.partition()}] at offset {msg.offset()}")
 
 class CircuitBreaker:
     def __init__(self, max_failures=5, reset_time=20, exception=Exception):
@@ -15,6 +35,13 @@ class CircuitBreaker:
         self.state = 'CLOSED'
         self.last_failure_time = None  
         self.lock = threading.Lock()
+        #self.kafka_producer = self.kafka_producer()  #potremmo farlo anche interno alla classe 
+        
+        
+    def send_to_kafka(self, topic, message):
+        """Invia il messaggio al topic Kafka."""
+        producer.produce(topic, json.dumps(message), callback=delivery_report)
+        producer.flush()  # Assicurati che i messaggi siano inviati prima di continuare
 
     def fetch_stock_values(self, tickers):
         """Effettua una chiamata a Yahoo Finance per ogni ticker unico."""
@@ -75,6 +102,17 @@ class CircuitBreaker:
                 else:
                     print(f"Nessun dato disponibile per {user.ticker}.")
             session.commit()
+            
+              # Dopo aver aggiornato il database, invia una notifica a Kafka
+            message = {
+                'status': 'Aggiornamento completato',
+                'timestamp': datetime.now().isoformat(),
+                'message': 'Aggiornamento dei dati azionari completato con successo.'
+            }
+            self.send_to_kafka('to-alert-system', message) #topic kafka to-alert-system
+            
+            
+            
             session.close()
 
 

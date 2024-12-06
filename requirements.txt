@@ -3,3 +3,4 @@ grpcio-tools
 sqlalchemy
 mysql-connector-python
 yfinance
+confluent-kafka
