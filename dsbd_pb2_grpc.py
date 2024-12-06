@@ -64,6 +64,11 @@ class DSBDServiceStub(object):
                 request_serializer=dsbd__pb2.GetTickerAverageRequest.SerializeToString,
                 response_deserializer=dsbd__pb2.TickerResponse.FromString,
                 _registered_method=True)
+        self.UpdateUserThresholds = channel.unary_unary(
+                '/DSBDService/UpdateUserThresholds',
+                request_serializer=dsbd__pb2.UpdateUserThresholdsRequest.SerializeToString,
+                response_deserializer=dsbd__pb2.UserResponse.FromString,
+                _registered_method=True)
 
 
 class DSBDServiceServicer(object):
@@ -105,6 +110,12 @@ class DSBDServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def UpdateUserThresholds(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_DSBDServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -137,6 +148,11 @@ def add_DSBDServiceServicer_to_server(servicer, server):
                     servicer.GetTickerAverage,
                     request_deserializer=dsbd__pb2.GetTickerAverageRequest.FromString,
                     response_serializer=dsbd__pb2.TickerResponse.SerializeToString,
+            ),
+            'UpdateUserThresholds': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateUserThresholds,
+                    request_deserializer=dsbd__pb2.UpdateUserThresholdsRequest.FromString,
+                    response_serializer=dsbd__pb2.UserResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -301,6 +317,33 @@ class DSBDService(object):
             '/DSBDService/GetTickerAverage',
             dsbd__pb2.GetTickerAverageRequest.SerializeToString,
             dsbd__pb2.TickerResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UpdateUserThresholds(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/DSBDService/UpdateUserThresholds',
+            dsbd__pb2.UpdateUserThresholdsRequest.SerializeToString,
+            dsbd__pb2.UserResponse.FromString,
             options,
             channel_credentials,
             insecure,

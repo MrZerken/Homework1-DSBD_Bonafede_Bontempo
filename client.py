@@ -78,10 +78,11 @@ def user_menu():
     """Mostra il menu per gli utenti loggati."""
     print("\n=== User Menu ===")
     print("1. Aggiorna ticker")
-    print("2. Elimina utente e dati")
-    print("3. Vedi ultimo valore del ticker")
-    print("4. Vedi la media degli ultimi X valori del ticker")
-    print("5. Logout")
+    print("2. Aggiorna soglie")
+    print("3. Elimina utente e dati")
+    print("4. Vedi ultimo valore del ticker")
+    print("5. Vedi la media degli ultimi X valori del ticker")
+    print("6. Logout")
 
 def run():
     """Gestisce l'intera esecuzione dell'applicazione."""
@@ -117,14 +118,24 @@ def run():
                     message_id = calculate_message_id(logged_in_email, new_ticker)
                     response = stub.UpdateUser(dsbd_pb2.UpdateUserRequest(email=logged_in_email, ticker=new_ticker, message_id=message_id))
                     print("UpdateUser:", response.message)
-                elif selection == '2':  # Delete user
+                elif selection == '2': #Update treshold
+                    modify = input("Vuoi modificare high_value? (si/no)")
+                    high_value = None
+                    low_value = None
+                    if modify == "si":
+                        high_value = float(input("Inserisci high_value: "))
+                    modify = input("Vuoi modificare low_value? (si/no)")
+                    if modify == "si":
+                        low_value = float(input("Inserisci low_value: "))
+                    response = stub.UpdateUserThresholds(dsbd_pb2.UpdateUserThresholdsRequest(email=logged_in_email, high_value=high_value if high_value is not None else 0, low_value=low_value if low_value is not None else 0))
+                elif selection == '3':  # Delete user
                     response = stub.DeleteUser(dsbd_pb2.DeleteUserRequest(email=logged_in_email))
                     print("DeleteUser:", response.message)
                     logout()
-                elif selection == '3':  # Get last stock value
+                elif selection == '4':  # Get last stock value
                     response = stub.GetTickerValue(dsbd_pb2.GetTickerRequest(email=logged_in_email))
                     print("LastStockValue:", response.value if response.success else response.message)
-                elif selection == '4':  # Get average stock value
+                elif selection == '5':  # Get average stock value
                     try:
                         nValues = int(input("Quanti valori devo considerare per la media? "))
                     except ValueError:
@@ -133,7 +144,7 @@ def run():
 
                     response = stub.GetTickerAverage(dsbd_pb2.GetTickerAverageRequest(email=logged_in_email, lastXValues=nValues))
                     print("AverageStockValue:", response.value if response.success else response.message)
-                elif selection == '5':  # Logout
+                elif selection == '6':  # Logout
                     logout()
                 else:
                     print("Hai selezionato un'opzione non valida!!")
