@@ -9,6 +9,7 @@ service DSBDService {
   rpc GetTickerAverage(GetTickerAverageRequest) returns (TickerResponse);
 
   rpc UpdateUserThresholds(UpdateUserThresholdsRequest) returns (UserResponse);
+  rpc ResetUserThresholds(ResetUserThresholdsRequest) returns (UserResponse);
 }
 
 message LoginUserRequest {
@@ -31,6 +32,12 @@ message UpdateUserThresholdsRequest {
   string email = 1;        
   float high_value = 2;    
   float low_value = 3;     
+}
+
+message ResetUserThresholdsRequest{
+  string email = 1;
+  int32 high_value = 2;
+  int32 low_value = 3;
 }
 
 message DeleteUserRequest {

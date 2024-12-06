@@ -140,12 +140,12 @@ def stock_market_open():
 
 if __name__ == '__main__':
     while True:
-        if True:
+        if True: #TODO reimpostare a stock_market_open()
             try:
                 circuit_breaker.update_stock_data()
             except CircuitBreakerOpenException as e:
                 print(e)
         else:
             print("Mercato Azionario chiuso. Nessun Aggiornamento Eseguito.")
-        time.sleep(150)
+        time.sleep(15) #TODO reimpostare a 150
         

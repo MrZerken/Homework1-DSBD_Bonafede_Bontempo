@@ -69,6 +69,11 @@ class DSBDServiceStub(object):
                 request_serializer=dsbd__pb2.UpdateUserThresholdsRequest.SerializeToString,
                 response_deserializer=dsbd__pb2.UserResponse.FromString,
                 _registered_method=True)
+        self.ResetUserThresholds = channel.unary_unary(
+                '/DSBDService/ResetUserThresholds',
+                request_serializer=dsbd__pb2.ResetUserThresholdsRequest.SerializeToString,
+                response_deserializer=dsbd__pb2.UserResponse.FromString,
+                _registered_method=True)
 
 
 class DSBDServiceServicer(object):
@@ -116,6 +121,12 @@ class DSBDServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ResetUserThresholds(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_DSBDServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -152,6 +163,11 @@ def add_DSBDServiceServicer_to_server(servicer, server):
             'UpdateUserThresholds': grpc.unary_unary_rpc_method_handler(
                     servicer.UpdateUserThresholds,
                     request_deserializer=dsbd__pb2.UpdateUserThresholdsRequest.FromString,
+                    response_serializer=dsbd__pb2.UserResponse.SerializeToString,
+            ),
+            'ResetUserThresholds': grpc.unary_unary_rpc_method_handler(
+                    servicer.ResetUserThresholds,
+                    request_deserializer=dsbd__pb2.ResetUserThresholdsRequest.FromString,
                     response_serializer=dsbd__pb2.UserResponse.SerializeToString,
             ),
     }
@@ -343,6 +359,33 @@ class DSBDService(object):
             target,
             '/DSBDService/UpdateUserThresholds',
             dsbd__pb2.UpdateUserThresholdsRequest.SerializeToString,
+            dsbd__pb2.UserResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ResetUserThresholds(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/DSBDService/ResetUserThresholds',
+            dsbd__pb2.ResetUserThresholdsRequest.SerializeToString,
             dsbd__pb2.UserResponse.FromString,
             options,
             channel_credentials,
