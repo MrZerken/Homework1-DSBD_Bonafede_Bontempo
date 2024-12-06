@@ -119,15 +119,29 @@ def run():
                     response = stub.UpdateUser(dsbd_pb2.UpdateUserRequest(email=logged_in_email, ticker=new_ticker, message_id=message_id))
                     print("UpdateUser:", response.message)
                 elif selection == '2': #Update treshold
-                    modify = input("Vuoi modificare high_value? (si/no)")
-                    high_value = None
-                    low_value = None
-                    if modify == "si":
-                        high_value = float(input("Inserisci high_value: "))
-                    modify = input("Vuoi modificare low_value? (si/no)")
-                    if modify == "si":
-                        low_value = float(input("Inserisci low_value: "))
-                    response = stub.UpdateUserThresholds(dsbd_pb2.UpdateUserThresholdsRequest(email=logged_in_email, high_value=high_value if high_value is not None else 0, low_value=low_value if low_value is not None else 0))
+                    choise = input("digita 1 per modificare, 2 per resettare: ")
+                    if choise == '1':
+                        modify = input("Vuoi modificare high_value? (si/no)")
+                        high_value = None
+                        low_value = None
+                        if modify == "si":
+                            high_value = float(input("Inserisci high_value: "))
+                        modify = input("Vuoi modificare low_value? (si/no)")
+                        if modify == "si":
+                            low_value = float(input("Inserisci low_value: "))
+                        response = stub.UpdateUserThresholds(dsbd_pb2.UpdateUserThresholdsRequest(email=logged_in_email, high_value=high_value if high_value is not None else -1, low_value=low_value if low_value is not None else -1))
+                        print("UpdateThresholds: ", response.message)
+                    elif choise == '2':
+                        high_value = 0
+                        low_value = 0
+                        reset = input("Vuoi resettare high_value? (si/no)")
+                        if reset == "si":
+                            high_value = 1
+                        reset = input("Vuoi resettare low_value? (si/no)")
+                        if reset == "si":
+                            low_value = 1
+                        response = stub.ResetUserThresholds(dsbd_pb2.ResetUserThresholdsRequest(email=logged_in_email, high_value=high_value, low_value=low_value))
+                        print("UpdateThresholds: ", response.message)
                 elif selection == '3':  # Delete user
                     response = stub.DeleteUser(dsbd_pb2.DeleteUserRequest(email=logged_in_email))
                     print("DeleteUser:", response.message)
