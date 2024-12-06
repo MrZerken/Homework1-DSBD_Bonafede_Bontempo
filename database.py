@@ -18,7 +18,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), unique=True, index=True, nullable=False)  # Lunghezza massima a 255
     ticker = Column(String(10), nullable=False)                           # Lunghezza massima a 10 per i ticker
-
+    
 class StockData(Base):
     __tablename__ = "stock_data"
     data_id = Column(Integer, primary_key=True, index=True)
