@@ -5,13 +5,13 @@ from database import SessionLocal, User, StockData  # Modifica se necessario per
 
 # Configurazione Kafka per il consumatore e il produttore
 consumer_config = {
-    'bootstrap.servers': 'localhost:29092',  # Indirizzo del broker Kafka
+    'bootstrap.servers': 'kafka:9092',  # Indirizzo del broker Kafka
     'group.id': 'group_alert',  # ID del gruppo di consumatori
     'auto.offset.reset': 'earliest',  # Inizia a leggere dal messaggio più vecchio
     'enable.auto.commit': True,  # Completamento automatico degli offset periodicamente
     'auto.commit.interval.ms': 5000  # Commit degli offset ogni 5000ms (5 secondi)
 }
-producer_config = {'bootstrap.servers': 'localhost:29092'}  # Configurazione del produttore
+producer_config = {'bootstrap.servers': 'kafka:9092'}  # Configurazione del produttore
 
 # Creazione delle istanze del consumatore e del produttore Kafka
 consumer = Consumer(consumer_config)
@@ -33,9 +33,9 @@ def produce_sync(producer, topic, value):
         # Produci il messaggio in modo sincrono
         producer.produce(topic, value)
         producer.flush()  # Blocca finché tutti i messaggi pendenti non sono stati inviati
-        print(f"Messaggio prodotto sincronicamente su {topic}: {value}")
+        print(f"Messaggio inviato a {topic} con contenuto: {value}")
     except Exception as e:
-        print(f"Impossibile produrre il messaggio: {e}")
+        print(f"Errore durante l'invio del messaggio a Kafka: {e}")
 
 while True:
     # Poll per nuovi messaggi dal topic di ingresso
@@ -73,7 +73,7 @@ while True:
                     'ticker': ticker,
                     'condition': condition
                 }
-                
+
                 #"email": "gaetano_bont@gmail.it",
                 #"ticker": "AAPL",
                 #"condition": "superamento soglia alta"

@@ -10,7 +10,7 @@ import json
 
 # Kafka configuration
 producer_config = {
-    'bootstrap.servers': 'localhost:29092',  # Kafka broker address
+    'bootstrap.servers': 'kafka:9092',  # Kafka broker address
     'acks': 'all',  # Ensure all in-sync replicas acknowledge the message
     'batch.size': 500,  # Maximum number of bytes to batch in a single request
     'max.in.flight.requests.per.connection': 1,  # Only one in-flight request per connection

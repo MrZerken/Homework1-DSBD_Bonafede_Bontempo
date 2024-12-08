@@ -7,7 +7,7 @@ from datetime import datetime
 
 # Configurazione Kafka per il consumer
 consumer_config = {
-    'bootstrap.servers': 'localhost:29092',  # Indirizzo del broker Kafka
+    'bootstrap.servers': 'kafka:9092',  # Indirizzo del broker Kafka
     'group.id': 'group1',  # ID del consumer group
     'auto.offset.reset': 'earliest',  # Inizia a leggere dal primo messaggio
     'enable.auto.commit': True,  # Committa automaticamente gli offset
