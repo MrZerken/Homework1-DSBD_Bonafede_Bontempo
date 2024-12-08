@@ -107,7 +107,7 @@ class CommandHandler:
         elif request.low_value == -1: 
             new_low_value = current_low_value
 
-        if new_low_value != None and new_high_value != None and new_low_value > new_high_value:
+        if new_low_value != None and new_high_value != None and new_low_value >= new_high_value:
             return UserResponse(success=False, message="low value non può essere maggiore di high value")
 
         # Aggiorna le soglie se fornite
