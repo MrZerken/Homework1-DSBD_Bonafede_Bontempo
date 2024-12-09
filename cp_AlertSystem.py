@@ -22,6 +22,10 @@ output_topic = 'to-notifier'  # Topic di destinazione per le notifiche
 
 consumer.subscribe([input_topic])  # Sottoscrizione al topic
 
+
+#NOTE capire meglio partizioni e leader 
+#NOTE Topic	Partizione	Leader topic1 topic1-0  broker-1
+
 def produce_sync(producer, topic, value):
     """
     Funzione del produttore sincrono che blocca fino a quando il messaggio non è stato consegnato.
@@ -55,6 +59,9 @@ while True:
     session = SessionLocal()
     users = session.query(User).all()
     
+    
+    #FIXME correggere query -> prendere valore per ogni utente dalla tabella stock e confrontarlo con high e low value nella tabella user
+    
     # Scansiona ogni utente
     for user in users:
         if user.ticker == ticker:
@@ -63,9 +70,9 @@ while True:
             email = user.email
             
             # Verifica la soglia e imposta la condizione superamento soglia
-            if (high_value is not None and value >= high_value):
+            if (high_value is not None and value > high_value):
                 condition = 'valore del ticker maggiore della soglia alta'
-            elif (low_value is not None and value <= low_value):
+            elif (low_value is not None and value < low_value):
                 condition = 'valore del ticker minore della soglia bassa'            
                 # Crea il messaggio di notifica
                 notification_message = {
