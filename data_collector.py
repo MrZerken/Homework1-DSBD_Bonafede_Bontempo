@@ -85,7 +85,6 @@ class CircuitBreaker:
                 self.nFailures = 0
 
             # Aggiorna il database per ogni utente
-            ticker_value = None #TODO: aggiunto per TEST
             for user in users:
                 value = ticker_values.get(user.ticker)
                 if value is not None:
@@ -97,7 +96,6 @@ class CircuitBreaker:
                     )
                     session.add(stock_data)
                     print(f"Aggiornato il dato di {user.email} per {user.ticker}: {value}")
-                    ticker_value = value #TODO: aggiunto per TEST
                 else:
                     print(f"Nessun dato disponibile per {user.ticker}.")
             session.commit()
@@ -106,7 +104,6 @@ class CircuitBreaker:
                 'status': 'Aggiornamento completato',
                 'timestamp': datetime.now().isoformat(),
                 'message': 'Aggiornamento dei dati azionari completato con successo.',
-                'valore_ticker': ticker_value
             }
             self.produce_to_topic1('to-alert-system', message)
             
