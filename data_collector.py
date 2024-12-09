@@ -34,12 +34,9 @@ class CircuitBreaker:
         self.nFailures = 0
         self.state = 'CLOSED'
         self.last_failure_time = None  
-        self.lock = threading.Lock()
-        #self.kafka_producer = self.kafka_producer()  #potremmo farlo anche interno alla classe 
+        self.lock = threading.Lock()        
         
-        
-    def send_to_kafka(self, topic, message):
-        """Invia il messaggio al topic Kafka."""
+    def produce_to_topic1(self, topic, message):
         producer.produce(topic, json.dumps(message), callback=delivery_report)
         producer.flush()  # Assicurati che i messaggi siano inviati prima di continuare
 
@@ -88,6 +85,7 @@ class CircuitBreaker:
                 self.nFailures = 0
 
             # Aggiorna il database per ogni utente
+            ticker_value = None #TODO: aggiunto per TEST
             for user in users:
                 value = ticker_values.get(user.ticker)
                 if value is not None:
@@ -99,17 +97,18 @@ class CircuitBreaker:
                     )
                     session.add(stock_data)
                     print(f"Aggiornato il dato di {user.email} per {user.ticker}: {value}")
+                    ticker_value = value #TODO: aggiunto per TEST
                 else:
                     print(f"Nessun dato disponibile per {user.ticker}.")
             session.commit()
             
-              # Dopo aver aggiornato il database, invia una notifica a Kafka
             message = {
                 'status': 'Aggiornamento completato',
                 'timestamp': datetime.now().isoformat(),
-                'message': 'Aggiornamento dei dati azionari completato con successo.'
+                'message': 'Aggiornamento dei dati azionari completato con successo.',
+                'valore_ticker': ticker_value
             }
-            self.send_to_kafka('to-alert-system', message) #topic kafka to-alert-system
+            self.produce_to_topic1('to-alert-system', message)
             
             
             
@@ -147,5 +146,5 @@ if __name__ == '__main__':
                 print(e)
         else:
             print("Mercato Azionario chiuso. Nessun Aggiornamento Eseguito.")
-        time.sleep(15) #TODO reimpostare a 150
+        time.sleep(60) #TODO reimpostare a 150
         
