@@ -51,9 +51,41 @@ services:
       DB_NAME: dsbd_db
     networks:
       - dsbd-network
-      
+
+  cp_alertsystem:
+    build:
+      context: .
+      dockerfile: Dockerfile.cp_alertsystem
+    container_name: alertsystem
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_USER: myuser
+      DB_PASSWORD: mypassword
+      DB_NAME: dsbd_db
+    networks:
+      - dsbd-network 
+    
+  c_alertnotifiersystem:
+    build:
+      context: .
+      dockerfile: Dockerfile.c_alertnotifiersystem
+    container_name: alertnotifiersystem
+    depends_on:
+      - cp_alertsystem
+    environment:
+      DB_HOST: db
+      DB_USER: myuser
+      DB_PASSWORD: mypassword
+      DB_NAME: dsbd_db
+    networks:
+      - dsbd-network 
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.4
+    container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -68,6 +100,7 @@ services:
       - zookeeper
     ports:
       - 29092:29092
+    container_name: kafka
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
