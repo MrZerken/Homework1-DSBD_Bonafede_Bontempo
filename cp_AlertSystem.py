@@ -1,93 +1,73 @@
 from confluent_kafka import Consumer, Producer
 import json
+import time
 from datetime import datetime
-from database import SessionLocal, User, StockData  # Modifica se necessario per il tuo modello database
+from database import SessionLocal, User, StockData
 
-# Configurazione Kafka per il consumatore e il produttore
+
+#configurazione kafka per produttore e consumatore
 consumer_config = {
-    'bootstrap.servers': 'kafka:9092',  # Indirizzo del broker Kafka
-    'group.id': 'group_alert',  # ID del gruppo di consumatori
-    'auto.offset.reset': 'earliest',  # Inizia a leggere dal messaggio più vecchio
-    'enable.auto.commit': True,  # Completamento automatico degli offset periodicamente
-    'auto.commit.interval.ms': 5000  # Commit degli offset ogni 5000ms (5 secondi)
+    'bootstrap.servers': 'kafka:9092',  # Kafka broker address
+    'group.id': 'group1',  # Consumer group ID
+    'auto.offset.reset': 'earliest',  # Start reading from the earliest message
+    'enable.auto.commit': True,  # Automatically commit offsets
+    'auto.commit.interval.ms': 5000  # Commit offsets every 5 seconds
 }
-producer_config = {'bootstrap.servers': 'kafka:9092'}  # Configurazione del produttore
 
-# Creazione delle istanze del consumatore e del produttore Kafka
+producer_config = {'bootstrap.servers': 'kafka:9092'}
+
 consumer = Consumer(consumer_config)
 producer = Producer(producer_config)
 
-input_topic = 'to-alert-system'  # Topic di origine per i messaggi dal DataCollector
-output_topic = 'to-notifier'  # Topic di destinazione per le notifiche
+topic1 = 'to-alert-system'
+topic2 = 'to-notifier'
 
-consumer.subscribe([input_topic])  # Sottoscrizione al topic
+consumer.subscribe([topic1])
 
-
-#NOTE capire meglio partizioni e leader 
-#NOTE Topic	Partizione	Leader topic1 topic1-0  broker-1
-
-def produce_sync(producer, topic, value):
-    """
-    Funzione del produttore sincrono che blocca fino a quando il messaggio non è stato consegnato.
-    :param producer: Istanza del produttore Kafka
-    :param topic: Topic Kafka a cui inviare il messaggio
-    :param value: Valore del messaggio (stringa)
-    """
-    try:
-        # Produci il messaggio in modo sincrono
-        producer.produce(topic, value)
-        producer.flush()  # Blocca finché tutti i messaggi pendenti non sono stati inviati
-        print(f"Messaggio inviato a {topic} con contenuto: {value}")
-    except Exception as e:
-        print(f"Errore durante l'invio del messaggio a Kafka: {e}")
-
+def delivery_report(err, msg):
+    """Callback to report the result of message delivery."""
+    if err:
+        print(f"Delivery failed: {err}")
+    else:
+        print(f"Message delivered to {msg.topic()} [{msg.partition()}] at offset {msg.offset()}")
+        
 while True:
-    # Poll per nuovi messaggi dal topic di ingresso
+    
     msg = consumer.poll(1.0)
     if msg is None:
-        continue  # Nessun messaggio ricevuto, continua a fare il polling
+        continue
     if msg.error():
-        print(f"Errore nel consumatore: {msg.error()}")  # Log degli errori del consumatore
+        print(f"Consumer error: {msg.error()}")
         continue
     
-    # Parsing del messaggio ricevuto
-    data = json.loads(msg.value().decode('utf-8'))
-    ticker = data.get('ticker')
-    value = data.get('value')
-    
-    # Accedi al database per ottenere gli utenti e i loro parametri di soglia
     session = SessionLocal()
+    # Query per ottenere tutti gli utenti e i relativi valori dei ticker
     users = session.query(User).all()
-    
-    
-    #FIXME correggere query -> prendere valore per ogni utente dalla tabella stock e confrontarlo con high e low value nella tabella user
-    
-    # Scansiona ogni utente
-    for user in users:
-        if user.ticker == ticker:
-            high_value = user.high_value
-            low_value = user.low_value
-            email = user.email
-            
-            # Verifica la soglia e imposta la condizione superamento soglia
-            if (high_value is not None and value > high_value):
-                condition = 'valore del ticker maggiore della soglia alta'
-            elif (low_value is not None and value < low_value):
-                condition = 'valore del ticker minore della soglia bassa'            
-                # Crea il messaggio di notifica
-                notification_message = {
-                    'email': email,
-                    'ticker': ticker,
-                    'condition': condition
-                }
 
-                #"email": "gaetano_bont@gmail.it",
-                #"ticker": "AAPL",
-                #"condition": "superamento soglia alta"
-                    
+    for user in users:
+            # Ottieniano l'ultimo valore del ticker dalla tabella Stock_Data per l'utente corrente
+            stock_data = session.query(StockData).filter_by(user_id=user.id).order_by(StockData.timestamp.desc()).first()
+            
+            if stock_data:
+                ticker_value = stock_data.value
+                print(f"Ticker: {user.ticker}, Value: {ticker_value}")
+
+                # Confronta il valore del ticker con high_value e low_value
+                condition = None
+                if user.high_value and ticker_value > user.high_value:
+                    condition = "il valore del ticker e' superiore alla soglia alta"
+                elif user.low_value and ticker_value < user.low_value:
+                    condition = "il valore del ticker e' inferiore alla soglia bassa"
                 
-                # Invia il messaggio al topic di notifica
-                produce_sync(producer, output_topic, json.dumps(notification_message))
-                print(f"Notifica inviata a {email} per il ticker {ticker} con condizione {condition}")
+                if condition:
+                    # Prepara il messaggio da inviare al topic to-notifier
+                    notifier_message = { "email": user.email, "subject": user.ticker, "condizione": condition}
+
+                    # Invia il messaggio al topic to-notifier
+                    producer.produce(topic2, json.dumps(notifier_message), callback=delivery_report)
+                    producer.flush() 
+                    print(f"Manda la notifica al {topic2}: {notifier_message}")
+                    
+    session.close()
     
-    session.close()  # Chiudi la sessione del database
+   
