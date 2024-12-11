@@ -8,7 +8,7 @@ from confluent_kafka import Producer
 import json
 
 
-# Kafka configuration
+#configurazione kafka per produttore
 producer_config = {
     'bootstrap.servers': 'kafka:9092',  # Kafka broker address
     'acks': 'all',  # Ensure all in-sync replicas acknowledge the message
@@ -18,6 +18,8 @@ producer_config = {
 }
 
 producer = Producer(producer_config)
+topic1 = 'to-alert-system' 
+
 
 def delivery_report(err, msg):
     """Callback to report the result of message delivery."""
@@ -35,10 +37,6 @@ class CircuitBreaker:
         self.state = 'CLOSED'
         self.last_failure_time = None  
         self.lock = threading.Lock()        
-        
-    def produce_to_topic1(self, topic, message):
-        producer.produce(topic, json.dumps(message), callback=delivery_report)
-        producer.flush()  # Assicurati che i messaggi siano inviati prima di continuare
 
     def fetch_stock_values(self, tickers):
         """Effettua una chiamata a Yahoo Finance per ogni ticker unico."""
@@ -96,18 +94,15 @@ class CircuitBreaker:
                     )
                     session.add(stock_data)
                     print(f"Aggiornato il dato di {user.email} per {user.ticker}: {value}")
+                    
                 else:
                     print(f"Nessun dato disponibile per {user.ticker}.")
             session.commit()
             
-            message = {
-                'status': 'Aggiornamento completato',
-                'timestamp': datetime.now().isoformat(),
-                'message': 'Aggiornamento dei dati azionari completato con successo.',
-            }
-            self.produce_to_topic1('to-alert-system', message)
-            
-            
+            #notifica i consumer che la fase di aggiornamento è completata
+            message = {'message': 'Aggiornamento dei dati azionari completato con successo.'}
+            producer.produce(topic1, json.dumps(message), callback=delivery_report)
+            producer.flush()  #assicura che i messaggi vengano inviati prima di continuare
             
             session.close()
 
@@ -143,5 +138,5 @@ if __name__ == '__main__':
                 print(e)
         else:
             print("Mercato Azionario chiuso. Nessun Aggiornamento Eseguito.")
-        time.sleep(60) #TODO reimpostare a 150
+        time.sleep(120) 
         
