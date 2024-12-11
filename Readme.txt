@@ -44,7 +44,9 @@ Il file docker-compose.yml include un health check per verificare che il databas
 
         docker-compose down -v
 
-    Per accedere al database MySQL, seguire i passaggi sottostanti:
+***Comandi utili per Mysql***
+
+Per accedere al database MySQL, seguire i passaggi sottostanti:
 
     Entrare nel container del database:
 
@@ -68,3 +70,34 @@ Il file docker-compose.yml include un health check per verificare che il databas
         stock_data;
         registration_messages;
         update_messages
+
+***Comandi Utili per Kafka***
+
+Per accedere alla shell del container Kafka, eseguire il seguente comando:
+
+docker exec -it kafka bash
+
+Per vedere la lista di tutti i topic Kafka presenti nel sistema, usare il comando:
+
+kafka-topics --bootstrap-server kafka:9092 --list
+
+
+Per consumare i messaggi dal topic to-alert-system e vedere i messaggi in tempo reale a partire dal primo messaggio, usare:
+
+kafka-console-consumer --bootstrap-server kafka:9092 --topic to-alert-system --from-beginning
+
+
+Per consumare i messaggi dal topic to-notifier e vedere i messaggi in tempo reale a partire dal primo messaggio, usare:
+
+kafka-console-consumer --bootstrap-server kafka:9092 --topic to-notifier --from-beginning
+
+
+Per inviare messaggi al topic to-alert-system, usare il comando kafka-console-producer. Questo comando permetterà di scrivere messaggi direttamente dalla shell che saranno inviati al topic specificato: 
+
+kafka-console-producer --bootstrap-server kafka:9092 --topic to-alert-system
+
+Dopo aver eseguito il comando per il producer Kafka, puoi inserire i messaggi da inviare in modalità interattiva.
+
+> inserire messaggio da inviare
+
+Ogni volta che viene premuto Enter, il messaggio viene inviato immediatamente al topic to-alert-system.
