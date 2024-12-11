@@ -21,6 +21,7 @@ class DSBDServer(DSBDServiceServicer):
     
     def UpdateUserThresholds(self, request, context):
         return self.command_handler.UpdateUserThresholds(request)
+    
     def ResetUserThresholds(self, request, context):
         return self.command_handler.ResetUserThresholds(request)
 

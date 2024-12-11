@@ -9,8 +9,8 @@ services:
       MYSQL_DATABASE: dsbd_db              
     healthcheck:  
       test: ["CMD-SHELL", "mysql -h 127.0.0.1 -u myuser -pmypassword -e 'SELECT 1'"] #faccio healthcheck con una query di test
-      interval: 10s                                                                   #in modo tale da dire a server e dc quando partire
-      timeout: 5s    
+      interval: 20s                                                                   #in modo tale da dire a server e dc quando partire
+      timeout: 10s    
       retries: 5
     volumes:
       - db_data:/var/lib/mysql             
@@ -57,9 +57,6 @@ services:
       context: .
       dockerfile: Dockerfile.cp_alertsystem
     container_name: alertsystem
-    depends_on:
-      db:
-        condition: service_healthy
     environment:
       DB_HOST: db
       DB_USER: myuser
@@ -67,6 +64,7 @@ services:
       DB_NAME: dsbd_db
     networks:
       - dsbd-network 
+    restart: always
     
   c_alertnotifiersystem:
     build:

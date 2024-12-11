@@ -5,7 +5,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY data_collector.py dsbd.proto database.py cp_AlertSystem.py c_AlertNotifierSystem.py ./ 
+COPY data_collector.py dsbd.proto database.py ./ 
 
 RUN python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. dsbd.proto
 
