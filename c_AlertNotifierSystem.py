@@ -23,8 +23,8 @@ consumer.subscribe([topic])
 # Configurazione Server SMTP
 SMTP_SERVER = 'smtp.gmail.com'      
 SMTP_PORT = 587                    
-EMAIL_ADDRESS = 'luca.tano.dsbd.unict@gmail.com'  
-EMAIL_PASSWORD = 'depi myrz ypkx mcgp'  
+EMAIL_ADDRESS = 'teamunict24@gmail.com'  
+EMAIL_PASSWORD = 'nqct wwth oftr vgkk'  
 
 def send_email(email, ticker, condition):
     """Invio dell'email di Notifica"""
@@ -49,7 +49,7 @@ Per ulteriori dettagli, può consultare il seguente link:
 
 Cordiali saluti, 
  
-Il sistema di notifiche B&B
+Bonafede e Bontempo
 """
         msg.attach(MIMEText(body, 'plain'))
 
