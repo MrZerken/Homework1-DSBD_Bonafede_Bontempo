@@ -131,7 +131,7 @@ def stock_market_open():
 
 if __name__ == '__main__':
     while True:
-        if True: #TODO reimpostare a stock_market_open()
+        if stock_market_open(): #FIXME per test impostare a True
             try:
                 circuit_breaker.update_stock_data()
             except CircuitBreakerOpenException as e:
